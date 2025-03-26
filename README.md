@@ -215,3 +215,63 @@ const isAdmin = async (req, res, next) => {
 export { isAdmin };
 
 ```
+
+## গেট ইউজার উইথ অ্যাডমিন এক্সেস 
+
+```javascript
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
+export default function Data() {
+  const [users, setUsers] = useState([]);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = Cookies.get("token");
+        const response = await axios.get(
+          "http://localhost:2000/api/admin/get-user",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+
+        console.log("API Response:", response.data);
+
+        setUsers(response.data.users);
+      } catch (err) {
+        console.error("Error fetching users:", err.response?.data || err);
+        setError(err.response?.data?.message || "Failed to fetch users");
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  if (error) {
+    return <div className="error text-red-500">{error}</div>;
+  }
+
+  return (
+    <div className="p-5">
+      <h2 className="text-xl font-bold mb-4">Admin Users</h2>
+      {users.length > 0 ? (
+        users.map((user, index) => (
+          <p key={user._id || index} className="text-gray-800">
+            {user.name || "No name provided"}
+          </p>
+        ))
+      ) : (
+        <p>No users found</p>
+      )}
+    </div>
+  );
+}
+
+```
+
+
+
